@@ -177,5 +177,27 @@ end
             @test isapprox(y[:, 1], x[:, 1] .^ 2; atol=1e-12) &&
                   all(iszero, y[:, 2])
         end
+
+        @testset "D5: masked singular edge does not leak NaN" begin
+            l = SymbolicKANLayer(1, 1)
+            fix_symbolic!(l, 1, 1, "sqrt")
+            ps = (affine=l.affine,)
+            st = (mask=zeros(1, 1), funs=l.funs, funs_name=l.funs_name)
+            y = l(reshape([-1.0], 1, 1), ps, st)[1]
+            @test all(isfinite, y) && all(iszero, y)
+        end
+
+        @testset "D6: forward type stability" begin
+            l = SymbolicKANLayer(2, 2)
+            fix_symbolic!(l, 1, 1, "sin")
+            fix_symbolic!(l, 2, 1, "x^2")
+            ps = (affine=l.affine,)
+            st = (mask=ones(2, 2), funs=l.funs, funs_name=l.funs_name)
+            x = randn(rng, 8, 2)
+            @test begin
+                @inferred l(x, ps, st)
+                true
+            end
+        end
     end
 end

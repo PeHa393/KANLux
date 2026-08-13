@@ -1,5 +1,6 @@
 name = "KANLux"
-uuid = "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+uuid = "4a58871a-9259-424f-be82-d5f3b51c21fc"
+authors = ["KANLux contributors"]
 version = "0.1.0"
 
 [deps]
@@ -9,14 +10,19 @@ Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
+Enzyme = "0.13"
 FiniteDifferences = "0.12.34"
+LinearAlgebra = "1.9"
 Lux = "1"
 LuxTestUtils = "2"
 NPZ = "0.4.3"
+Random = "1.9"
+Statistics = "1.9"
 Zygote = "0.7.12"
 julia = "1.9"
 
 [extras]
+Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
 FiniteDifferences = "26cc04aa-876d-5657-8c51-4c34ba976000"
 LuxTestUtils = "ac9de150-d08f-4546-94fb-7472b5760531"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
@@ -24,4 +30,4 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [targets]
-test = ["Test", "FiniteDifferences", "LuxTestUtils", "NPZ", "Zygote"]
+test = ["Test", "Enzyme", "FiniteDifferences", "LuxTestUtils", "NPZ", "Zygote"]

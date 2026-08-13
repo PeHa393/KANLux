@@ -5,6 +5,7 @@
 # layers and the full MultKAN container.
 
 include("test_infra.jl")
+using Enzyme
 
 # ── Small helper utilities ──────────────────────────────────────────────────
 
@@ -176,6 +177,17 @@ end
         end
         foreach(r -> push!(reports, r), rs)
         @test maximum(r.max_abs for r in rs) < 1e-4
+    end
+
+    @testset "G7: Enzyme reverse-mode smoke" begin
+        mode = Enzyme.set_runtime_activity(Reverse)
+        gk = Enzyme.gradient(mode, kloss, kps)[1]
+        gs = Enzyme.gradient(mode, sloss, sps)[1]
+        gm = Enzyme.gradient(mode, mloss, mps)[1]
+
+        @test !_has_nan(gk) && _maxabs(gk) > 0
+        @test !_has_nan(gs) && _maxabs(gs) > 0
+        @test !_has_nan(gm) && _maxabs(gm) > 0
     end
 
     @testset "D1: NaN detection" begin

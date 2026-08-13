@@ -51,6 +51,19 @@ include("test_infra.jl")
             @test all(0.0 .<= train_x .<= 10.0)
             @test all(0.0 .<= test_x .<= 10.0)
         end
+
+        @testset "D4: scalar label rejected for multi-sample input" begin
+            @test_throws DimensionMismatch create_dataset(
+                x -> 1.0, 2, (-1.0, 1.0), 10, 2
+            )
+        end
+
+        @testset "D5: scalar label allowed for empty/single-sample output" begin
+            train_x, train_y, test_x, test_y =
+                create_dataset(x -> 1.0, 2, (-1.0, 1.0), 1, 0)
+            @test size(train_y) == (1, 1)
+            @test size(test_y) == (0, 1)
+        end
     end
 
     @testset "R) reference loading" begin

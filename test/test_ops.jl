@@ -171,5 +171,17 @@ include("test_infra.jl")
             res = refine(m, ps, st, x, 8)
             @test res.model.width_in[end] == 2
         end
+
+        @testset "C4: prune rejects empty hidden layer" begin
+            m = MultKAN([2, 2, 1]; grid=3, k=3, symbolic_enabled=false)
+            ps, st = Lux.setup(rng, m)
+            ps.act_fun[1].coef .= 0.0
+            ps.act_fun[1].scale_base .= 0.0
+            ps.act_fun[1].scale_sp .= 0.0
+            st.act_fun[1].mask .= 0.0
+            x = randn(rng, 16, 2)
+            @test_throws ArgumentError prune(m, ps, st, x;
+                                             node_th=0.0, edge_th=0.0)
+        end
     end
 end

@@ -162,5 +162,33 @@ end
             y = m(randn(rng, 1, 2), ps, st)[1]
             @test size(y) == (1, 1) && all(isfinite, y)
         end
+
+        @testset "D4: zero-width hidden layer rejected" begin
+            @test_throws ArgumentError MultKAN([2, 0, 1]; grid=3, k=3)
+        end
+
+        @testset "D5: forward type stability" begin
+            for symbolic_enabled in (false, true)
+                m = MultKAN([2, 1]; grid=3, k=3,
+                            symbolic_enabled=symbolic_enabled)
+                ps, st = Lux.setup(rng, m)
+                x = randn(rng, 8, 2)
+                @test begin
+                    @inferred m(x, ps, st)
+                    true
+                end
+            end
+        end
+
+        @testset "D6: multiplication-node type stability" begin
+            m = MultKAN([[2, 0], [1, 2], [1, 0]]; grid=3, k=3,
+                        mult_arity=2, symbolic_enabled=true)
+            ps, st = Lux.setup(rng, m)
+            x = randn(rng, 8, 2)
+            @test begin
+                @inferred m(x, ps, st)
+                true
+            end
+        end
     end
 end

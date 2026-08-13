@@ -11,6 +11,10 @@ using Random
 
 _symbolic_zero(x) = zero(x)
 
+@inline _symbolic_call(f::Function, pre::Float64)::Float64 = f(pre)
+@inline _symbolic_call_avoid(name::String, pre::Float64, y_th::Float64)::Float64 =
+    SYMBOLIC_LIB[name][3](pre, y_th)
+
 """
     SymbolicKANLayer(in_dim, out_dim)
 
@@ -165,12 +169,11 @@ function (l::SymbolicKANLayer)(x::AbstractMatrix, ps::NamedTuple, st::NamedTuple
             c_ = ps.affine[j, i, 3]
             d_ = ps.affine[j, i, 4]
             pre = a_ * x[b, i] + b_
-            z = if singularity_avoiding
-                SYMBOLIC_LIB[st.funs_name[j, i]][3](pre, y_th)
-            else
-                st.funs[j, i](pre)
-            end
-            st.mask[j, i] * (c_ * z + d_)
+            z = singularity_avoiding ?
+                _symbolic_call_avoid(st.funs_name[j, i], pre, y_th) :
+                _symbolic_call(st.funs[j, i], pre)
+            value = c_ * z + d_
+            iszero(st.mask[j, i]) ? zero(value) : st.mask[j, i] * value
         end
         for b in 1:batch, j in 1:l.out_dim, i in 1:l.in_dim
     ]

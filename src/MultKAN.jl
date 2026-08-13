@@ -16,30 +16,36 @@ Composite KAN model.
 `[n_sum, n_mult]` pairs (e.g. `[[2, 0], [5, 0], [1, 0]]`) when multiplication
 nodes are present.
 """
-struct MultKAN <: Lux.AbstractLuxContainerLayer{(:act_fun, :symbolic_fun)}
-    act_fun::Tuple{Vararg{KANLayer}}
-    symbolic_fun::Tuple{Vararg{SymbolicKANLayer}}
+struct MultKAN{A<:Tuple, S<:Tuple, MA, G, K} <:
+       Lux.AbstractLuxContainerLayer{(:act_fun, :symbolic_fun)}
+    act_fun::A
+    symbolic_fun::S
     width::Vector{Vector{Int}}
-    mult_arity::Any
+    mult_arity::MA
     depth::Int
     width_in::Vector{Int}
     width_out::Vector{Int}
     mult_homo::Bool
     symbolic_enabled::Bool
-    grid::Any
-    k::Any
+    grid::G
+    k::K
 end
 
 function _normalize_width(width)
     out = Vector{Vector{Int}}()
     for w in width
         if w isa Integer
-            push!(out, [Int(w), 0])
+            pair = [Int(w), 0]
         elseif w isa AbstractVector{<:Integer} && length(w) == 2
-            push!(out, [Int(w[1]), Int(w[2])])
+            pair = [Int(w[1]), Int(w[2])]
         else
             throw(ArgumentError("width entries must be integers or [n_sum, n_mult] pairs"))
         end
+        (pair[1] >= 0 && pair[2] >= 0) ||
+            throw(ArgumentError("width entries must be non-negative"))
+        (pair[1] + pair[2] > 0) ||
+            throw(ArgumentError("width entries must describe at least one neuron"))
+        push!(out, pair)
     end
     length(out) >= 2 || throw(ArgumentError("width must have at least two layers"))
     return out
@@ -63,19 +69,17 @@ function MultKAN(width; grid=3, k=3, mult_arity=2, base_fun=silu,
         width_out = [width_norm[d][1] + sum(Int.(mult_arity[d])) for d in 1:(depth + 1)]
     end
 
-    act_layers = Vector{KANLayer}(undef, depth)
-    sym_layers = Vector{SymbolicKANLayer}(undef, depth)
-    for d in 1:depth
+    act_layers = ntuple(d -> begin
         grid_d = grid isa AbstractVector ? grid[d] : grid
         k_d = k isa AbstractVector ? k[d] : k
-        act_layers[d] = KANLayer(width_in[d], width_out[d + 1], grid_d, k_d;
-                                 grid_eps=grid_eps, grid_range=grid_range,
-                                 base_fun=base_fun, sp_trainable=sp_trainable,
-                                 sb_trainable=sb_trainable)
-        sym_layers[d] = SymbolicKANLayer(width_in[d], width_out[d + 1])
-    end
+        KANLayer(width_in[d], width_out[d + 1], grid_d, k_d;
+                 grid_eps=grid_eps, grid_range=grid_range,
+                 base_fun=base_fun, sp_trainable=sp_trainable,
+                 sb_trainable=sb_trainable)
+    end, depth)
+    sym_layers = ntuple(d -> SymbolicKANLayer(width_in[d], width_out[d + 1]), depth)
 
-    return MultKAN(Tuple(act_layers), Tuple(sym_layers), width_norm, mult_arity,
+    return MultKAN(act_layers, sym_layers, width_norm, mult_arity,
                    depth, width_in, width_out, mult_homo, symbolic_enabled, grid, k)
 end
 

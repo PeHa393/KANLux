@@ -78,6 +78,10 @@ end
 
 function _as_label_matrix(y, n::Int)
     if y isa Number
+        n == 0 && return zeros(Float64, 0, 1)
+        n == 1 || throw(DimensionMismatch(
+            "label is a scalar but expected $n rows; return a vector or matrix instead"
+        ))
         return reshape([float(y)], 1, 1)
     elseif y isa AbstractVector
         length(y) == n || throw(DimensionMismatch("label vector has length $(length(y)); expected $n"))
