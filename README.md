@@ -16,6 +16,14 @@ using Pkg
 Pkg.develop(path="KANLux")
 ```
 
+After the package has been registered in the General registry, install a
+released version with:
+
+```julia
+using Pkg
+Pkg.add("KANLux")
+```
+
 The package depends on `Lux`, `Random`, `LinearAlgebra`, and `Statistics`.
 Test dependencies (`Zygote`, `FiniteDifferences`, `LuxTestUtils`, `NPZ`) are
 declared only for the test target.
