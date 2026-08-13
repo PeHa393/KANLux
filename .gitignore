@@ -1,0 +1,11 @@
+# Julia package artifacts
+Manifest.toml
+LocalPreferences.toml
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# OS and editor noise
+.DS_Store
+Thumbs.db
+__pycache__/
