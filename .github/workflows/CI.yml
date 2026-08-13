@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    continue-on-error: ${{ matrix.experimental || false }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            julia-version: "1.9"
+          - os: ubuntu-latest
+            julia-version: "1.10"
+          - os: ubuntu-latest
+            julia-version: "1"
+          - os: windows-latest
+            julia-version: "1"
+          - os: macos-latest
+            julia-version: "1"
+          - os: ubuntu-latest
+            julia-version: nightly
+            experimental: true
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+          show-versioninfo: true
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+
+      - name: Instantiate and precompile
+        run: julia --project=. -e 'using Pkg; Pkg.instantiate(); Pkg.precompile()'
+
+      - name: Run test suite
+        run: julia --project=. -e 'using Pkg; Pkg.test()'
+
+  smoke-install:
+    name: Clean install smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+          show-versioninfo: true
+
+      - name: Cache Julia artifacts
+        uses: julia-actions/cache@v2
+
+      - name: Install from repository path and load package
+        run: |
+          julia --startup-file=no -e '
+            using Pkg
+            Pkg.activate(; temp=true)
+            Pkg.develop(path=pwd())
+            Pkg.instantiate()
+            using KANLux
+            println("KANLux loaded successfully")
+          '
