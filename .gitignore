@@ -12,4 +12,5 @@ __pycache__/
 
 # Local-only project metadata
 .opencode/
+.dsh/
 AGENTS.md
