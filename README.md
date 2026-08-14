@@ -16,7 +16,7 @@ intentionally left to the application layer.
 
 ## Installation
 
-Julia 1.9 or newer is required. Choose one of the three methods below.
+Julia 1.10 or newer is required. Choose one of the three methods below.
 
 ### 1. From source (development)
 

@@ -22,8 +22,6 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            julia-version: "1.9"
-          - os: ubuntu-latest
             julia-version: "1.10"
           - os: ubuntu-latest
             julia-version: "1"

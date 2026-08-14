@@ -12,14 +12,14 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 [compat]
 Enzyme = "0.13"
 FiniteDifferences = "0.12.34"
-LinearAlgebra = "1.9"
+LinearAlgebra = "1.10"
 Lux = "1"
 LuxTestUtils = "2"
 NPZ = "0.4.3"
-Random = "1.9"
-Statistics = "1.9"
+Random = "1.10"
+Statistics = "1.10"
 Zygote = "0.7.12"
-julia = "1.9"
+julia = "1.10"
 
 [extras]
 Enzyme = "7da242da-08ed-463a-9acd-ee780be4f1d9"
