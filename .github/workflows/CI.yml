@@ -16,7 +16,6 @@ jobs:
     name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
-    continue-on-error: ${{ matrix.experimental || false }}
     strategy:
       fail-fast: false
       matrix:
@@ -29,9 +28,6 @@ jobs:
             julia-version: "1"
           - os: macos-latest
             julia-version: "1"
-          - os: ubuntu-latest
-            julia-version: nightly
-            experimental: true
 
     permissions:
       contents: read
